@@ -75,6 +75,12 @@ COMMAND LINE OPTIONS:
 -etha	Ethereum algorithm mode for AMD cards. 0 - optimized for fast cards, 1 - optimized for slow cards, 2 - for gpu-pro Linux drivers. -1 - autodetect (default, automatically selects between 0 and 1). 
 	You can also set this option for every card individually, for example "-etha 0,1,0".
 
+-asm	(AMD cards only) enables assembler GPU kernels. In this mode some tuning is required even in ETH-only mode, use "-dcri" option or or "+/-" keys in runtime to set best speed.
+	Currently only ETH-only and ETH-DCR modes are supported in assembler.
+	Specify "-asm 0" to disable this option. You can also specify values for every card, for example "-asm 0,1,0". Default value is "1".
+	If ASM mode is enabled, miner must show "GPU #x: algorithm ASM" at startup.
+	Check "FINE-TUNING" section below for additional notes.
+
 -ethi	Ethereum intensity. Default value is 8, you can decrease this value if you don't want Windows to freeze or if you have problems with stability. The most low GPU load is "-ethi 0".
 	Also "-ethi" now can set intensity for every card individually, for example "-ethi 1,8,6".
 	You can also specify negative values, for example, "-ethi -8192", it exactly means "global work size" parameter which is used in official miner.
@@ -108,7 +114,7 @@ COMMAND LINE OPTIONS:
 -dpsw 	Password for Decred/Siacoin/Lbry/Pascal pool.
 
 -di 	GPU indexes, default is all available GPUs. For example, if you have four GPUs "-di 02" will enable only first and third GPUs (#0 and #2).
-	Use "-di detect" value to detect correct GPU order for temperatures management (requires non-zero "-tt" option); note that it will not work properly if you do not want to assign all GPUs to miner.
+	Use "-di detect" value to detect correct GPU order for temperatures management (requires non-zero "-tt" option); note that it will not work properly if you do not want to assign all GPUs to miner (add "-gmap" option to fix it).
 	You can also turn on/off cards in runtime with "0"..."9" keys and check current statistics with "s" key.
 
 -gser	this setting can improve stability on multi-GPU systems if miner hangs during startup. It serializes GPUs initalization routines. Use "-gser 1" to serailize some of routines and "-gser 2" to serialize all routines.
@@ -120,7 +126,7 @@ COMMAND LINE OPTIONS:
 
 -dcoin	select second coin to mine in dual mode. Possible options are "-dcoin dcr", "-dcoin sc", "-dcoin lbc", "-dcoin pasc". Default value is "dcr".
 
--dcri	Decred/Siacoin/Lbry/Pascal intensity. Default value is 30, you can adjust this value to get the best Decred/Siacoin/Lbry mining speed without reducing Ethereum mining speed. 
+-dcri	Decred/Siacoin/Lbry/Pascal intensity, or Ethereum fine-tuning value in ETH ASM mode. Default value is 30, you can adjust this value to get the best Decred/Siacoin/Lbry mining speed without reducing Ethereum mining speed. 
 	You can also specify values for every card, for example "-dcri 30,100,50".
 	You can change the intensity in runtime with "+" and "-" keys and check current statistics with "s" key.
 	For example, by default (-dcri 30) 390 card shows 29MH/s for Ethereum and 440MH/s for Decred. Setting -dcri 70 causes 24MH/s for Ethereum and 850MH/s for Decred.
@@ -219,6 +225,10 @@ COMMAND LINE OPTIONS:
 
 -v	displays miner version, sample usage: "-v 1".
 
+-gmap	sets GPU order in fan/temperature list. This option is similar to "-di" option, but it manages fan/temperature list. 
+	For example, if you have two cards, you can change their order by adding "-gmap 10". Another example, reverse order for six cards: "-gmap 543210".
+	This option is also useful if you want to exclude some GPUs from the list. For example, if you have four cards, you can exclude first GPU from fan/temperature list with "-gmap 123".
+
 
 
 CONFIGURATION FILE
@@ -311,6 +321,16 @@ Ethereum SOLO mining (assume geth is on 192.168.0.1:8545):
 
 
 
+FINE-TUNING
+
+Dual mode: change "-dcri" option value with "+/-" keys in runtime to find best speeds.
+ETH-only mode when ASM algorithm is used (enabled by default): change "-dcri" option value with "+/-" keys in runtime to find best speeds.
+NOTE 1: if GPU throttles (overheated), best "-dcri" value is different.
+NOTE 2: speed peak can be rather short, so change "-dcri" value slowly, one-by-one.
+NOTE 3: best -dcri values for ETH-only mode and dual mode can be different.
+
+
+
 FAILOVER
 
 Use "epools.txt" and "dpools.txt" files to specify additional pools. These files have text format, one pool per line. Every pool has 3 connection attempts. 
@@ -336,11 +356,11 @@ Check "Help" tab for built-in help.
 
 KNOWN ISSUES
 
-- Weak/old cards like 7xxx/270/270X cannot handle dual mining properly, Ethereum mining is slower by about 5%.
 - AMD cards: GPU indexes in temperature control sometimes don't match GPU indexes in mining. Miner has to enumerate GPUs via OpenCL API to execute OpenCL code, and also it has to enumerate GPUs via ADL API to manage temperature/clock. 
 And order of GPUs in these lists can be different. There is no way to fix GPUs order automatically, thanks to AMD devs.
 But you can do it manually. For example, if you have two cards, you can change their order by adding "-di 10". Another example, reverse order for six cards: "-di 543210".
 Also you can do it automatically (experimental feature) with "-di detect" option.
+Also you can change GPUs order in temperature/fan list with "-gmap" option.
 - Windows 10 Defender recognizes miner as a virus, some antiviruses do the same. Miner is not a virus, add it to Defender exceptions. 
   I write miners since 2014. Most of them are recognized as viruses by some paranoid antiviruses, perhaps because I pack my miners to protect them from disassembling, perhaps because some people include them into their botnets, or perhaps these antiviruses are not good, I don't know. For these years, a lot of people used my miners and nobody confirmed that my miner stole anything or did something bad. 
   Note that I can guarantee clean binaries only for official links in my posts on this forum (bitcointalk). If you downloaded miner from some other link - it really can be a virus.
