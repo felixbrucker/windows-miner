@@ -13,7 +13,7 @@ MEGA: https://mega.nz/#F!O4YA2JgD!n2b4iSHQDruEsYUvTQP5_w
 FEATURES:
 
 - Supports new "dual mining" mode: mining both Ethereum and Decred/Siacoin/Lbry/Pascal at the same time, with no impact on Ethereum mining speed. Ethereum-only mining mode is supported as well.
-- Effective Ethereum mining speed is higher by 3-5% because of a completely different miner code - much less invalid and outdated shares, higher GPU load, optimized OpenCL code.
+- Effective Ethereum mining speed is higher by 3-5% because of a completely different miner code - much less invalid and outdated shares, higher GPU load, optimized OpenCL code, optimized assembler kernels.
 - Supports both AMD and nVidia cards, even mixed.
 - No DAG files.
 - Supports all Stratum versions for Ethereum: can be used directly without any proxies with all pools that support eth-proxy, qtminer or miner-proxy.
@@ -76,10 +76,11 @@ COMMAND LINE OPTIONS:
 	You can also set this option for every card individually, for example "-etha 0,1,0".
 
 -asm	(AMD cards only) enables assembler GPU kernels. In this mode some tuning is required even in ETH-only mode, use "-dcri" option or or "+/-" keys in runtime to set best speed.
-	Currently only ETH-only and ETH-DCR modes are supported in assembler.
+	Currently ETH-LBRY mode is not supported in assembler.
 	Specify "-asm 0" to disable this option. You can also specify values for every card, for example "-asm 0,1,0". Default value is "1".
 	If ASM mode is enabled, miner must show "GPU #x: algorithm ASM" at startup.
 	Check "FINE-TUNING" section below for additional notes.
+	NEW: added alternative assembler kernels for Tonga and Polaris cards for ETH-only mode. Use them if you get best speed at "-dcri 1" (i.e. you cannot find speed peak), use "-asm 2" option to enable this mode.
 
 -ethi	Ethereum intensity. Default value is 8, you can decrease this value if you don't want Windows to freeze or if you have problems with stability. The most low GPU load is "-ethi 0".
 	Also "-ethi" now can set intensity for every card individually, for example "-ethi 1,8,6".
@@ -215,13 +216,13 @@ COMMAND LINE OPTIONS:
 -mvddc	set target GPU memory voltage, multiplied by 1000. For example, "-mvddc 1050" means 1.05V. You can also specify values for every card, for example "-mvddc 900,950,1000,970". Supports latest AMD 4xx cards only in Windows.
 	Note: for NVIDIA cards this option is not supported.
 
--mport	remote monitoring/management port. Default value is -3333 (read-mode), specify "-mport 0" to disable remote monitoring/management feature. 
+-mport	remote monitoring/management port. Default value is -3333 (read-only mode), specify "-mport 0" to disable remote monitoring/management feature. 
 	Specify negative value to enable monitoring (get statistics) but disable management (restart, uploading files), for example, "-mport -3333" enables port 3333 for remote monitoring, but remote management will be blocked.
 	You can also use your web browser to see current miner state, for example, type "localhost:3333" in web browser. 
 	Warning: use negative option value or disable remote management entirely if you think that you can be attacked via this port!
 	By default, miner will accept connections on specified port on all network adapters, but you can select desired network interface directly, for example, "-mport 127.0.0.1:3333" opens port on localhost only.
 
--colors enables or disables colored text in console. Default value is "1", use "-colors 0" to disable coloring.
+-colors enables or disables colored text in console. Default value is "1", use "-colors 0" to disable coloring. Use 2...4 values to remove some of colors.
 
 -v	displays miner version, sample usage: "-v 1".
 
@@ -324,8 +325,8 @@ Ethereum SOLO mining (assume geth is on 192.168.0.1:8545):
 FINE-TUNING
 
 Dual mode: change "-dcri" option value with "+/-" keys in runtime to find best speeds.
-ETH-only mode when ASM algorithm is used (enabled by default): change "-dcri" option value with "+/-" keys in runtime to find best speeds.
-NOTE 1: if GPU throttles (overheated), best "-dcri" value is different.
+ETH-only mode when ASM algorithm is used (enabled by default): change "-dcri" option value with "+/-" keys in runtime to find best speeds. If you get best speed at "-dcri 1" (i.e. you cannot find speed peak), use "-asm 2" option to enable alternative ASM kernel (available for Tonga and Polaris cards only).
+NOTE 1: if GPU throttles (overheated) or if you overclocked GPU, best "-dcri" value will be different.
 NOTE 2: speed peak can be rather short, so change "-dcri" value slowly, one-by-one.
 NOTE 3: best -dcri values for ETH-only mode and dual mode can be different.
 
@@ -356,6 +357,8 @@ Check "Help" tab for built-in help.
 
 KNOWN ISSUES
 
+- AMD cards: On some Polaris cards you can notice non-constant mining speeds in dual mode when ASM mode is used; you can also see in GPU-Z that memory controller load is not constant, it drops for a few seconds. 
+   This issue is related to hardware and I cannot find any good workaround for now. Try to increase "-dcri" value a bit, it will reduce ETH speed a bit, but speeds will be much more stable.
 - AMD cards: GPU indexes in temperature control sometimes don't match GPU indexes in mining. Miner has to enumerate GPUs via OpenCL API to execute OpenCL code, and also it has to enumerate GPUs via ADL API to manage temperature/clock. 
 And order of GPUs in these lists can be different. There is no way to fix GPUs order automatically, thanks to AMD devs.
 But you can do it manually. For example, if you have two cards, you can change their order by adding "-di 10". Another example, reverse order for six cards: "-di 543210".
@@ -466,3 +469,5 @@ This miner does not use HTTP protocol, it uses Stratum directly. So you should c
 - I cannot mine Ethereum with 2GB card.
   Yes, you cannot mine Ethereum or Ethereum Classic with 2GB cards anymore.
 
+- On dual mining, if one of my miners has 6 cards, with 2 dual mining and 4 single mining, is devfee 1% or 2%? 
+  As soon as you enable dual mining, devfee is 2% for all cards. But you can start two miner instances and split cards between them to get 1% on first instance and 2% on second.
