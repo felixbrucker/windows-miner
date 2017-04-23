@@ -265,7 +265,7 @@ Dual mining:
 	EthDcrMiner64.exe -epool us1.ethpool.org:3333 -ewal 0xD69af2A796A737A103F12d2f0BCC563a13900E6F.YourWorkerName -epsw x -dpool "http://siamining.com:9980/miner/header?address=3be0304dee313515cf401b8593a0c1df905ed13f0adaee89a8d7337d2ba8209e5ca9f297bbc2&worker=YourWorkerName" -dcoin sia
 
  dwarfpool (and Stratum for Decred):
-	EthDcrMiner64.exe -epool eth-eu.dwarfpool.com:8008 -ewal 0xD69af2A796A737A103F12d2f0BCC563a13900E6F/YourWorkerName -epsw x -dpool stratum+tcp://dcr.suprnova.cc:2252 -dwal Redhex.my -dpsw x
+	EthDcrMiner64.exe -epool eth-eu.dwarfpool.com:8008 -ewal 0xD69af2A796A737A103F12d2f0BCC563a13900E6F/YourWorkerName -epsw x -dpool stratum+tcp://dcr.suprnova.cc:3252 -dwal Redhex.my -dpsw x
 	Read dwarfpool FAQ for additional options, for example, you can setup email notifications if you specify your email as password.
 
  dwarfpool (and Stratum for Lbry):
@@ -344,12 +344,13 @@ Pool specified in the command line is "main" pool, miner will try to return to i
 If no pool was specified in the command line then first pool in the failover pools list is main pool.
 You can change 30 minutes time period to some different value with "-ftime" option, or use "-ftime 0" to disable switching to main pool.
 You can also use environment variables in "epools.txt", "dpools.txt" and "config.txt" files. For example, define "WORKER" environment variable and use it as "%WORKER%" in config.txt or in epools.txt.
+You can also select current pool in runtime by pressing "e" or "d" key.
 
 
 
 REMOTE MONITORING/MANAGEMENT
 
-Miner supports remote monitoring/management via JSON protocol over TCP/IP sockets, HTTP is supported as well
+Miner supports remote monitoring/management via JSON protocol over TCP/IP sockets, HTTP is supported as well.
 Start "EthMan.exe" from "Remote management" subfolder (Windows version only).
 Check "Help" tab for built-in help.
 
@@ -426,9 +427,6 @@ This miner does not use HTTP protocol, it uses Stratum directly. So you should c
 - Will newer drivers have higher/lower hashrate?
   Usually no, but it depends... Check for yourself.
 
-- Why miner does not show temperatures for RX 480 cards?
-  They use newer overdrive API which is not yet published by AMD.
-
 - Why miner on Linux with stock card settings gives a bit lower hashrate than on Windows?
   This probably is the difference in time calculations on both platforms. In reality the accepted hashrate is usually the same.
 
@@ -471,3 +469,12 @@ This miner does not use HTTP protocol, it uses Stratum directly. So you should c
 
 - On dual mining, if one of my miners has 6 cards, with 2 dual mining and 4 single mining, is devfee 1% or 2%? 
   As soon as you enable dual mining, devfee is 2% for all cards. But you can start two miner instances and split cards between them to get 1% on first instance and 2% on second.
+
+- Miner freezes if I put cursor to its window in Windows 10 until any key is pressed. Sometimes miner freezes randomly until any key is pressed.
+  You should make some changes in Windows:
+  https://superuser.com/questions/555160/windows-command-prompt-freezing-on-focus
+  https://superuser.com/questions/419717/windows-command-prompt-freezing-randomly?rq=1
+  https://superuser.com/questions/1051821/command-prompt-random-pause?rq=1
+
+- Sometimes miner cannot connect to devfee mining server at first attempt, does it cause longer devfee mining?
+  No, during these connection attempts miner still mines for you. 
