@@ -1,6 +1,15 @@
 VERSION HISTORY
 
 
+v9.3
+---------------------------------------------------------------------
+
+- improved dual mining speed stability in ASM mode.
+- added "-altnum" option for alternative GPU indexing.
+- a few minor bug fixes and improvements.
+
+
+
 v9.2
 ---------------------------------------------------------------------
 

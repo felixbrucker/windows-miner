@@ -230,6 +230,13 @@ COMMAND LINE OPTIONS:
 	For example, if you have two cards, you can change their order by adding "-gmap 10". Another example, reverse order for six cards: "-gmap 543210".
 	This option is also useful if you want to exclude some GPUs from the list. For example, if you have four cards, you can exclude first GPU from fan/temperature list with "-gmap 123".
 
+-altnum	alternative GPU indexing. This option does not change GPU order, but just changes GPU indexes that miner displays, it can be useful in some cases. Possible values are:
+	0: default GPU indexing. For example, if you specify "-di 05" to select first and last GPUs of six GPUs installed, miner will display these two selected cards as "GPU0" and "GPU1".
+	1: same as "0", but start indexes from one instead of zero. For example, if you specify "-di 05" to select first and last GPUs of six GPUs installed, miner will display these two selected cards as "GPU1" and "GPU2".
+	2: alternative GPU indexing. For example, if you specify "-di 05" to select first and last GPUs of six GPUs installed, miner will display these two selected cards as "GPU0" and "GPU5".
+	3: same as "2", but start indexes from one instead of zero. For example, if you specify "-di 05" to select first and last GPUs of six GPUs installed, miner will display these two selected cards as "GPU1" and "GPU6".
+	Default value is "0".
+
 
 
 CONFIGURATION FILE
@@ -358,8 +365,7 @@ Check "Help" tab for built-in help.
 
 KNOWN ISSUES
 
-- AMD cards: On some Polaris cards you can notice non-constant mining speeds in dual mode when ASM mode is used; you can also see in GPU-Z that memory controller load is not constant, it drops for a few seconds. 
-   This issue is related to hardware and I cannot find any good workaround for now. Try to increase "-dcri" value a bit, it will reduce ETH speed a bit, but speeds will be much more stable.
+- AMD cards: on some cards you can notice non-constant mining speed in dual mode, sometimes speed becomes a bit slower. This issue was mostly fixed in recent versions, but not completely.
 - AMD cards: GPU indexes in temperature control sometimes don't match GPU indexes in mining. Miner has to enumerate GPUs via OpenCL API to execute OpenCL code, and also it has to enumerate GPUs via ADL API to manage temperature/clock. 
 And order of GPUs in these lists can be different. There is no way to fix GPUs order automatically, thanks to AMD devs.
 But you can do it manually. For example, if you have two cards, you can change their order by adding "-di 10". Another example, reverse order for six cards: "-di 543210".
