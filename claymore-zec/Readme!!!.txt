@@ -133,13 +133,15 @@ COMMAND LINE OPTIONS:
 
 -mvddc	set target GPU memory voltage, multiplied by 1000. For example, "-mvddc 1050" means 1.05V. You can also specify values for every card, for example "-mvddc 900,950,1000,970". Supports latest AMD 4xx cards only in Windows.
 
--mport	remote monitoring/management port. Default value is -3333 (read-mode), specify "-mport 0" to disable remote monitoring/management feature. 
+-mport	remote monitoring/management port. Default value is -3333 (read-only mode), specify "-mport 0" to disable remote monitoring/management feature. 
 	Specify negative value to enable monitoring (get statistics) but disable management (restart, uploading files), for example, "-mport -3333" enables port 3333 for remote monitoring, but remote management will be blocked.
 	You can also use your web browser to see current miner state, for example, type "localhost:3333" in web browser. 
 	Warning: use negative option value or disable remote management entirely if you think that you can be attacked via this port!
 	By default, miner will accept connections on specified port on all network adapters, but you can select desired network interface directly, for example, "-mport 127.0.0.1:3333" opens port on localhost only.
 
--colors enables or disables colored text in console. Default value is "1", use "-colors 0" to disable coloring.
+-mpsw	remote monitoring/management password. By default it is empty, so everyone can ask statistics or manage miner remotely if "-mport" option is set. You can set password for remote access (at least EthMan v3.0 is required to support passwords).
+
+-colors enables or disables colored text in console. Default value is "1", use "-colors 0" to disable coloring. Use 2...4 values to remove some of colors.
 
 -v	displays miner version, sample usage: "-v 1".
 
