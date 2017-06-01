@@ -127,7 +127,7 @@ COMMAND LINE OPTIONS:
 
 -dcoin	select second coin to mine in dual mode. Possible options are "-dcoin dcr", "-dcoin sc", "-dcoin lbc", "-dcoin pasc". Default value is "dcr".
 
--dcri	Decred/Siacoin/Lbry/Pascal intensity, or Ethereum fine-tuning value in ETH ASM mode. Default value is 30, you can adjust this value to get the best Decred/Siacoin/Lbry mining speed without reducing Ethereum mining speed. 
+-dcri	Decred/Siacoin/Lbry/Pascal intensity, or Ethereum fine-tuning value in ETH-only ASM mode. Default value is 30, you can adjust this value to get the best Decred/Siacoin/Lbry mining speed without reducing Ethereum mining speed. 
 	You can also specify values for every card, for example "-dcri 30,100,50".
 	You can change the intensity in runtime with "+" and "-" keys and check current statistics with "s" key.
 	For example, by default (-dcri 30) 390 card shows 29MH/s for Ethereum and 440MH/s for Decred. Setting -dcri 70 causes 24MH/s for Ethereum and 850MH/s for Decred.
@@ -222,6 +222,8 @@ COMMAND LINE OPTIONS:
 	Warning: use negative option value or disable remote management entirely if you think that you can be attacked via this port!
 	By default, miner will accept connections on specified port on all network adapters, but you can select desired network interface directly, for example, "-mport 127.0.0.1:3333" opens port on localhost only.
 
+-mpsw	remote monitoring/management password. By default it is empty, so everyone can ask statistics or manage miner remotely if "-mport" option is set. You can set password for remote access (at least EthMan v3.0 is required to support passwords).
+
 -colors enables or disables colored text in console. Default value is "1", use "-colors 0" to disable coloring. Use 2...4 values to remove some of colors.
 
 -v	displays miner version, sample usage: "-v 1".
@@ -255,9 +257,9 @@ SAMPLE USAGE
 Dual mining:
 
  ethpool, ethermine  (and Stratum for Decred): 
-	EthDcrMiner64.exe -epool us1.ethpool.org:3333 -ewal 0xD69af2A796A737A103F12d2f0BCC563a13900E6F.YourWorkerName -epsw x -dpool stratum+tcp://yiimp.ccminer.org:4252 -dwal DsUt9QagrYLvSkJHXCvhfiZHKafVtzd7Sq4 -dpsw x
+	EthDcrMiner64.exe -epool us1.ethpool.org:3333 -ewal 0xD69af2A796A737A103F12d2f0BCC563a13900E6F.YourWorkerName -epsw x -dpool stratum+tcp://yiimp.ccminer.org:3252 -dwal DsUt9QagrYLvSkJHXCvhfiZHKafVtzd7Sq4 -dpsw x
 	you can also specify "-esm 1" option to enable "qtminer" mode, in this mode pool will display additional information about shares (accepted/rejected), for example:
-	EthDcrMiner64.exe -epool us1.ethermine.org:4444 -esm 1 -ewal 0xD69af2A796A737A103F12d2f0BCC563a13900E6F.YourWorkerName -epsw x -dpool stratum+tcp://yiimp.ccminer.org:4252 -dwal DsUt9QagrYLvSkJHXCvhfiZHKafVtzd7Sq4 -dpsw x
+	EthDcrMiner64.exe -epool us1.ethermine.org:4444 -esm 1 -ewal 0xD69af2A796A737A103F12d2f0BCC563a13900E6F.YourWorkerName -epsw x -dpool stratum+tcp://yiimp.ccminer.org:3252 -dwal DsUt9QagrYLvSkJHXCvhfiZHKafVtzd7Sq4 -dpsw x
 
  ethpool, ethermine  (and Siacoin solo):
 	EthDcrMiner64.exe -epool us1.ethpool.org:3333 -ewal 0xD69af2A796A737A103F12d2f0BCC563a13900E6F.YourWorkerName -epsw x -dpool http://localhost:9980/miner/header -dcoin sia
@@ -484,3 +486,7 @@ This miner does not use HTTP protocol, it uses Stratum directly. So you should c
 
 - Sometimes miner cannot connect to devfee mining server at first attempt, does it cause longer devfee mining?
   No, during these connection attempts miner still mines for you. 
+
+- I upgraded from v8.x (or earlier) to v9.x, I mine ETH-only and I see v9.x is slower than v8.x, why?
+  In v9.x you should find best -dcri value even in ETH-only mode, check "FINE-TUNING" section. If you don't want to do it, use "-asm 0" option to use old GPU kernels.
+
