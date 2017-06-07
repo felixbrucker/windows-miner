@@ -490,3 +490,6 @@ This miner does not use HTTP protocol, it uses Stratum directly. So you should c
 - I upgraded from v8.x (or earlier) to v9.x, I mine ETH-only and I see v9.x is slower than v8.x, why?
   In v9.x you should find best -dcri value even in ETH-only mode, check "FINE-TUNING" section. If you don't want to do it, use "-asm 0" option to use old GPU kernels.
 
+- How many cards are supported?
+  Miner supports up to 32 GPUs, though some options like "-di" will not work properly for some cards since they accept 0..9 indexes only.
+
