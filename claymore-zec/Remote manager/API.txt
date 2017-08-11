@@ -48,4 +48,17 @@ Calls "reboot.bat" for Windows, or "reboot.bash" (or "reboot.sh") for Linux.
 
 
 
+----------------
+REQUEST:
+{"id":0,"jsonrpc":"2.0","method":"control_gpu", "params":[0, 1]}
+
+RESPONSE:
+none.
+
+COMMENTS:
+first number - GPU index, or "-1" for all GPUs. Second number - new GPU state, 0 - disabled, 1 - ETH-only mode, 2 - dual mode.
+
+
+
+
 

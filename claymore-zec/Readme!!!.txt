@@ -32,6 +32,7 @@ This miner is free-to-use, however, current developer fee is 2% if you use secur
 If you use unsecure connection to mining pool, current developer fee is 2.5%, every hour the miner mines for 90 seconds for developer. 
 If you don't agree with the dev fee - don't use this miner, or use "-nofee" option.
 Attempts to cheat and remove dev fee will cause a bit slower mining speed (same as "-nofee 1") though miner will show same hashrate.
+Miner cannot just stop if cheat is detected because creators of cheats would know that the cheat does not work and they would find new tricks. If miner does not show any errors or slowdowns, they are happy.
 
 This version is for recent AMD videocards only: 7xxx, 2xx, 3xx and 4xx, 1GB or more.
 
@@ -65,8 +66,8 @@ COMMAND LINE OPTIONS:
 	Note that if devfee mining pools will stop, entire mining will be stopped too.
 
 -di 	GPU indexes, default is all available GPUs. For example, if you have four GPUs "-di 02" will enable only first and third GPUs (#0 and #2).
-	Use "-di detect" value to detect correct GPU order for temperatures management (requires non-zero "-tt" option); note that it will not work properly if you do not want to assign all GPUs to miner (add "-gmap" option to fix it).
 	You can also turn on/off cards in runtime with "0"..."9" keys and check current statistics with "s" key.
+	For systems with more than 10 GPUs: use letters to specify indexes more than 9, for example, "a" means index 10, "b" means index 11, etc.
 
 -ftime	failover main pool switch time, in minutes, see "Failover" section below. Default value is 30 minutes, set zero if there is no main pool.
 
@@ -107,11 +108,9 @@ COMMAND LINE OPTIONS:
 	You can see if intensity was reduced in detailed statistics ("s" key).
 	You can also specify values for every card, for example "-ttli 80,85,80". You also should specify non-zero value for "-tt" option to enable this option.
 	It is a good idea to set "-ttli" value higher than "-tt" value by 3-5C.
-	NOTE: Check "KNOWN ISSUES" section. GPU indexes in temperature control sometimes don't match GPU indexes in mining!
 
 -tstop	set stop GPU temperature, miner will stop mining if GPU reaches specified temperature. For example, "-tstop 95" means 95C temperature. You can also specify values for every card, for example "-tstop 95,85,90".
 	This feature is disabled by default ("-tstop 0"). You also should specify non-zero value for "-tt" option to enable this option.
-	NOTE: Check "KNOWN ISSUES" section. GPU indexes in temperature control sometimes don't match GPU indexes in mining!
 	If it turned off wrong card, it will close miner in 30 seconds.
 	You can also specify negative value to close miner immediately instead of stopping GPU, for example, "-tstop -95" will close miner as soon as any GPU reach 95C temperature.
 
@@ -144,10 +143,6 @@ COMMAND LINE OPTIONS:
 -colors enables or disables colored text in console. Default value is "1", use "-colors 0" to disable coloring. Use 2...4 values to remove some of colors.
 
 -v	displays miner version, sample usage: "-v 1".
-
--gmap	sets GPU order in fan/temperature list. This option is similar to "-di" option, but it manages fan/temperature list. 
-	For example, if you have two cards, you can change their order by adding "-gmap 10". Another example, reverse order for six cards: "-gmap 543210".
-	This option is also useful if you want to exclude some GPUs from the list. For example, if you have four cards, you can exclude first GPU from fan/temperature list with "-gmap 123".
 
 
 
@@ -208,24 +203,20 @@ Pool specified in the command line is "main" pool, miner will try to return to i
 If no pool was specified in the command line then first pool in the failover pools list is main pool.
 You can change 30 minutes time period to some different value with "-ftime" option, or use "-ftime 0" to disable switching to main pool.
 You can also use environment variables in "epools.txt" and "config.txt" files. For example, define "WORKER" environment variable and use it as "%WORKER%" in config.txt or in epools.txt.
+You can also select current pool in runtime by pressing "e" key.
 
 
 
 REMOTE MONITORING/MANAGEMENT
 
-Miner supports remote monitoring/management via JSON protocol over TCP/IP sockets, HTTP is supported as well.
+Miner supports remote monitoring/management via JSON protocol over raw TCP/IP sockets. You can also get recent console text lines via HTTP.
 Start "EthMan.exe" from "Remote management" subfolder (Windows version only).
-Check "Help" tab for built-in help.
+Check built-in help for more information. "API.txt" file contains more details about protocol.
 
 
 
 KNOWN ISSUES
 
-- AMD cards: GPU indexes in temperature control sometimes don't match GPU indexes in mining. Miner has to enumerate GPUs via OpenCL API to execute OpenCL code, and also it has to enumerate GPUs via ADL API to manage temperature/clock. 
-And order of GPUs in these lists can be different. There is no way to fix GPUs order automatically, thanks to AMD devs.
-But you can do it manually. For example, if you have two cards, you can change their order by adding "-di 10". Another example, reverse order for six cards: "-di 543210".
-Also you can do it automatically (experimental feature) with "-di detect" option.
-Also you can change GPUs order in temperature/fan list with "-gmap" option.
 - Windows 10 Defender recognizes miner as a virus, some antiviruses do the same. Miner is not a virus, add it to Defender exceptions. 
   I write miners since 2014. Most of them are recognized as viruses by some paranoid antiviruses, perhaps because I pack my miners to protect them from disassembling, perhaps because some people include them into their botnets, or perhaps these antiviruses are not good, I don't know. For these years, a lot of people used my miners and nobody confirmed that my miner stole anything or did something bad. 
   Note that I can guarantee clean binaries only for official links in my posts on this forum (bitcointalk). If you downloaded miner from some other link - it really can be a virus.
@@ -258,4 +249,16 @@ DevFee: Pool sets new share target: 0x0083126e (diff: 500H) - this is for devfee
 Pool sets new share target: 0x0024fa4f (diff: 1772H) - this is for main mining connection
 As you can see, target share for main mining is higher in about 3.5 times, so for main mining miner sends in 3 times less shares (but they have 3x more value) than for devfee mining.
 
+Q: Miner freezes if I put cursor to its window in Windows 10 until any key is pressed. Sometimes miner freezes randomly until any key is pressed.
+A: You should make some changes in Windows:
+  https://superuser.com/questions/555160/windows-command-prompt-freezing-on-focus
+  https://superuser.com/questions/419717/windows-command-prompt-freezing-randomly?rq=1
+  https://superuser.com/questions/1051821/command-prompt-random-pause?rq=1
 
+Q: Can I mix Polaris cards (RX 4xx/5xx) and Fury cards in same rig?
+A: You will not get best speed for Polaris and Fury cards mixed in one rig in Windows. Possible solutions:
+1. Split Polaris and Fury GPUs to different rigs.
+2. Use Linux.
+3. Use "-asm 0" option for Fury cards (leave "asm 1" for Polaris cards) though they will have less speed in this mode.
+
+It is also a good idea to read FAQ of Dual miner, most questions/answers are correct for this miner too: https://bitcointalk.org/index.php?topic=1433925.0

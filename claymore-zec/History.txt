@@ -1,6 +1,22 @@
 VERSION HISTORY
 
 
+
+v12.6
+---------------------------------------------------------------------
+
+- added Vega cards support (ASM mode).
+- added ASM mode for RX460/560 cards (+20% speed).
+- new GPU sorting method for AMD cards. Now GPUs are sorted by physical bus index (it matches AfterBurner list of GPUs). Also the list of temperatures/fans matches the list of GPUs automatically.
+  Therefore "-di detect" and "-gmap" options are not necessary and not supported anymore.
+  WARNING: be careful if you use use separate overclock/temperature settings for every card, due to new sorting method GPUs can get different indexes!
+- added fan/OC support for 17.7.2 (and higher) drivers.
+- improved support for systems with more than 10 GPUs, check readme for "-di" option description for details.
+- added pool selection in runtime ("e" key).
+- a few minor improvements.
+
+
+
 v12.5 This version is assumed to be stable, so it is not marked as "beta".
 ---------------------------------------------------------------------
 
