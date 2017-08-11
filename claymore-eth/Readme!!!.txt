@@ -33,6 +33,7 @@ FEATURES:
 This version is POOL/SOLO for Ethereum, POOL for Decred, POOL/SOLO for Siacoin, POOL for Lbry, POOL for Pascal.
 
 For AMD cards, Catalyst (Crimson) 15.12 is required for best performance and compatibility. You can get very bad results for different drivers version, or miner can fail on startup.
+For AMD 4xx/5xx cards (Polaris) you can use any recent drivers.
 For AMD cards, set the following environment variables, especially if you have 2GB cards:
 
 GPU_FORCE_64BIT_PTR 0
@@ -47,7 +48,8 @@ For multi-GPU systems, set Virtual Memory size in Windows at least 16 GB:
 This miner is free-to-use, however, current developer fee is 1% for Ethereum-only mining mode (-mode 1) and 2% for dual mining mode (-mode 0), every hour the miner mines for 36 or 72 seconds for developer. 
 Decred/Siacoin/Lbry/Pascal is mined without developer fee.
 If you don't agree with the dev fee - don't use this miner, or use "-nofee" option.
-Attempts to cheat and remove dev fee will cause a bit slower mining speed (same as "-nofee 1") though miner will show same hashrate.
+Attempts to cheat and remove dev fee will cause a bit slower mining speed (same as "-nofee 1") though miner will show same hashrate. 
+Miner cannot just stop if cheat is detected because creators of cheats would know that the cheat does not work and they would find new tricks. If miner does not show any errors or slowdowns, they are happy.
 
 This version is for recent AMD videocards only: 7xxx, 2xx and 3xx, 2GB or more. Recent nVidia videocards are supported as well.
 
@@ -100,6 +102,7 @@ COMMAND LINE OPTIONS:
 	for example, "-allcoins 47" means that miner will expect DAG size for epoch #47 and will allocate appropriate GPU buffer at starting, instead of reallocating bigger GPU buffer (may crash) when it starts devfee mining.
 	Another option is to specify "-allcoins -1", in this mode miner will start devfee round immediately after start and therefore will get current epoch for Ethereum, after that it will be able to mine Ethereum fork.
 	If you mine Expanse, the best way is to specify "-allcoins exp", in this mode devfee mining will be on Expanse too and DAG won't be recreated at all.
+	If you mine ETC on some pool that does not accept wallet address but requires Username.Worker instead, the best way is to specify "-allcoins etc", in this mode devfee mining will be on ETC pools and DAG won't be recreated at all.
 
 -etht	Time period between Ethereum HTTP requests for new job in solo mode, in milliseconds. Default value is 200ms.
 
@@ -115,8 +118,8 @@ COMMAND LINE OPTIONS:
 -dpsw 	Password for Decred/Siacoin/Lbry/Pascal pool.
 
 -di 	GPU indexes, default is all available GPUs. For example, if you have four GPUs "-di 02" will enable only first and third GPUs (#0 and #2).
-	Use "-di detect" value to detect correct GPU order for temperatures management (requires non-zero "-tt" option); note that it will not work properly if you do not want to assign all GPUs to miner (add "-gmap" option to fix it).
 	You can also turn on/off cards in runtime with "0"..."9" keys and check current statistics with "s" key.
+	For systems with more than 10 GPUs: use letters to specify indexes more than 9, for example, "a" means index 10, "b" means index 11, etc.
 
 -gser	this setting can improve stability on multi-GPU systems if miner hangs during startup. It serializes GPUs initalization routines. Use "-gser 1" to serailize some of routines and "-gser 2" to serialize all routines.
 	Default value is "0" (no serialization, fast initialization).
@@ -124,6 +127,7 @@ COMMAND LINE OPTIONS:
 -mode	Select mining mode:
 	"-mode 0" (default) means dual Ethereum + Decred/Siacoin/Lbry mining mode.
 	"-mode 1" means Ethereum-only mining mode. You can set this mode for every card individually, for example, "-mode 1-02" will set mode "1" for first and third GPUs (#0 and #2).
+	For systems with more than 10 GPUs: use letters to specify indexes more than 9, for example, "a" means index 10, "b" means index 11, etc.
 
 -dcoin	select second coin to mine in dual mode. Possible options are "-dcoin dcr", "-dcoin sc", "-dcoin lbc", "-dcoin pasc". Default value is "dcr".
 
@@ -144,12 +148,14 @@ COMMAND LINE OPTIONS:
 	"-r 1" closes miner and execute "reboot.bat" file ("reboot.bash" or "reboot.sh" for Linux version) in the miner directory (if exists) if some GPU failed. 
 	So you can create "reboot.bat" file and perform some actions, for example, reboot system if you put this line there: "shutdown /r /t 5 /f".
 
+-minspeed	minimal speed for ETH, in MH/s. If miner cannot reach this speed for 5 minutes for any reason, miner will be restarted (or "reboot.bat" will be executed if "-r 1" is set). Default value is 0 (feature disabled).
+
 -retrydelay	delay, in seconds, between connection attempts. Default values is "20". Specify "-retrydelay -1" if you don't need reconnection, in this mode miner will exit if connection is lost.
 
 -dbg	debug log and messages. "-dbg 0" - (default) create log file but don't show debug messages. 
 	"-dbg 1" - create log file and show debug messages. "-dbg -1" - no log file and no debug messages.
 
--logfile debug log file name. After restart, miner will append new log data to the same file. If you want to clear old log data, file name must contain "noappend" string.
+-logfile	debug log file name. After restart, miner will append new log data to the same file. If you want to clear old log data, file name must contain "noappend" string.
 	If missed, default file name will be used.
 
 -nofee	set "1" to cancel my developer fee at all. In this mode some optimizations are disabled so mining speed will be slower by about 4%. 
@@ -167,6 +173,10 @@ COMMAND LINE OPTIONS:
 -lidag	low intensity mode for DAG generation, it can help with OC or weak PSU. Supported values are 0, 1, 2, 3, more value means lower intensity. Example: "-lidag 1".
 	You can also specify values for every card, for example "-lidag 1,0,3". Default value is "0" (no low intensity for DAG generation).
 
+-ejobtimeout	job timeout for ETH, in minutes. If miner does not get new jobs for this time, it will disconnect from pool. Default value is 10.
+
+-djobtimeout	job timeout for second coin in dual mode, in minutes. If miner does not get new jobs for this time, it will disconnect from pool. Default value is 30.
+
 -tt	set target GPU temperature. For example, "-tt 80" means 80C temperature. You can also specify values for every card, for example "-tt 70,80,75".
 	You can also set static fan speed if you specify negative values, for example "-tt -50" sets 50% fan speed. Specify zero to disable control and hide GPU statistics.
 	"-tt 1" (default) does not manage fans but shows GPU temperature and fan status every 30 seconds. Specify values 2..5 if it is too often.
@@ -177,17 +187,14 @@ COMMAND LINE OPTIONS:
 	You can see current Decred intensity coefficients in detailed statistics ("s" key). So if you set "-dcri 50" but Decred/Siacoin intensity coefficient is 20% it means that GPU currently mines Decred/Siacoin at "-dcri 10".
 	You can also specify values for every card, for example "-ttdcr 80,85,80". You also should specify non-zero value for "-tt" option to enable this option.
 	It is a good idea to set "-ttdcr" value higher than "-tt" value by 3-5C.
-	NOTE: Check "KNOWN ISSUES" section. GPU indexes in temperature control sometimes don't match GPU indexes in mining!
 
 -ttli	reduce entire mining intensity (for all coins) automatically if GPU temperature is above specified value. For example, "-ttli 80" reduces mining intensity if GPU temperature is above 80C.
 	You can see if intensity was reduced in detailed statistics ("s" key).
 	You can also specify values for every card, for example "-ttli 80,85,80". You also should specify non-zero value for "-tt" option to enable this option.
 	It is a good idea to set "-ttli" value higher than "-tt" value by 3-5C.
-	NOTE: Check "KNOWN ISSUES" section. GPU indexes in temperature control sometimes don't match GPU indexes in mining!
 
 -tstop	set stop GPU temperature, miner will stop mining if GPU reaches specified temperature. For example, "-tstop 95" means 95C temperature. You can also specify values for every card, for example "-tstop 95,85,90".
 	This feature is disabled by default ("-tstop 0"). You also should specify non-zero value for "-tt" option to enable this option.
-	NOTE: Check "KNOWN ISSUES" section. GPU indexes in temperature control sometimes don't match GPU indexes in mining!
 	If it turned off wrong card, it will close miner in 30 seconds.
 	You can also specify negative value to close miner immediately instead of stopping GPU, for example, "-tstop -95" will close miner as soon as any GPU reach 95C temperature.
 
@@ -200,11 +207,13 @@ COMMAND LINE OPTIONS:
 	Note: for NVIDIA cards this option is not supported.
 
 -cclock	set target GPU core clock speed, in MHz. If not specified or zero, miner will not change current clock speed. You can also specify values for every card, for example "-cclock 1000,1050,1100,0".
-	Unfortunately, AMD blocked underclocking for some reason, you can overclock only.
+	Note: for some drivers versions AMD blocked underclocking for some reason, you can overclock only.
+	Note: this option changes clocks for all power states, so check voltage for all power states in WattMan or use -cvddc option.  
+	By default, low power states have low voltage, setting high GPU clock for low power states without increasing voltage can cause driver crash.
 	Note: for NVIDIA cards this option is not supported.
 
 -mclock	set target GPU memory clock speed, in MHz. If not specified or zero, miner will not change current clock speed. You can also specify values for every card, for example "-mclock 1200,1250,1200,0".
-	Unfortunately, AMD blocked underclocking for some reason, you can overclock only.
+	Note: for some drivers versions AMD blocked underclocking for some reason, you can overclock only.
 	Note: for NVIDIA cards this option is not supported.
 
 -powlim set power limit, from -50 to 50. If not specified, miner will not change power limit. You can also specify values for every card, for example "-powlim 20,-20,0,10".
@@ -227,10 +236,6 @@ COMMAND LINE OPTIONS:
 -colors enables or disables colored text in console. Default value is "1", use "-colors 0" to disable coloring. Use 2...4 values to remove some of colors.
 
 -v	displays miner version, sample usage: "-v 1".
-
--gmap	sets GPU order in fan/temperature list. This option is similar to "-di" option, but it manages fan/temperature list. 
-	For example, if you have two cards, you can change their order by adding "-gmap 10". Another example, reverse order for six cards: "-gmap 543210".
-	This option is also useful if you want to exclude some GPUs from the list. For example, if you have four cards, you can exclude first GPU from fan/temperature list with "-gmap 123".
 
 -altnum	alternative GPU indexing. This option does not change GPU order, but just changes GPU indexes that miner displays, it can be useful in some cases. Possible values are:
 	0: default GPU indexing. For example, if you specify "-di 05" to select first and last GPUs of six GPUs installed, miner will display these two selected cards as "GPU0" and "GPU1".
@@ -359,20 +364,16 @@ You can also select current pool in runtime by pressing "e" or "d" key.
 
 REMOTE MONITORING/MANAGEMENT
 
-Miner supports remote monitoring/management via JSON protocol over TCP/IP sockets, HTTP is supported as well.
+Miner supports remote monitoring/management via JSON protocol over raw TCP/IP sockets. You can also get recent console text lines via HTTP.
 Start "EthMan.exe" from "Remote management" subfolder (Windows version only).
-Check "Help" tab for built-in help.
+Check built-in help for more information. "API.txt" file contains more details about protocol.
 
 
 
 KNOWN ISSUES
 
 - AMD cards: on some cards you can notice non-constant mining speed in dual mode, sometimes speed becomes a bit slower. This issue was mostly fixed in recent versions, but not completely.
-- AMD cards: GPU indexes in temperature control sometimes don't match GPU indexes in mining. Miner has to enumerate GPUs via OpenCL API to execute OpenCL code, and also it has to enumerate GPUs via ADL API to manage temperature/clock. 
-And order of GPUs in these lists can be different. There is no way to fix GPUs order automatically, thanks to AMD devs.
-But you can do it manually. For example, if you have two cards, you can change their order by adding "-di 10". Another example, reverse order for six cards: "-di 543210".
-Also you can do it automatically (experimental feature) with "-di detect" option.
-Also you can change GPUs order in temperature/fan list with "-gmap" option.
+- AMD cards: in Linux with gpu-pro drivers, the list of GPUs may differ from the list of temperatures. You can use -di to change order of GPUs to match both lists.
 - Windows 10 Defender recognizes miner as a virus, some antiviruses do the same. Miner is not a virus, add it to Defender exceptions. 
   I write miners since 2014. Most of them are recognized as viruses by some paranoid antiviruses, perhaps because I pack my miners to protect them from disassembling, perhaps because some people include them into their botnets, or perhaps these antiviruses are not good, I don't know. For these years, a lot of people used my miners and nobody confirmed that my miner stole anything or did something bad. 
   Note that I can guarantee clean binaries only for official links in my posts on this forum (bitcointalk). If you downloaded miner from some other link - it really can be a virus.
@@ -406,17 +407,11 @@ This miner does not use HTTP protocol, it uses Stratum directly. So you should c
 - How to mine using pool X?
   Read "Readme!!!.txt", "SAMPLE USAGE" section.
 
-- Why wrong temperature is displayed?
-  Read "Readme!!!.txt", "KNOWN ISSUES" section. 
-
 - Windows 10 marks miner as a virus.
   Read "Readme!!!.txt", "KNOWN ISSUES" section.
 
 - Can miner stop overheated GPU?
   Yes, see "-tstop" option.
-
-- Why miner does not stop overheated GPU immediately?
-  See question above about wrong temperatures.
 
 - Why this command line doesn't work (escaping '&')?
   Char '&' in command line means command separator, to use it in command line either quote string with "", or escape '&' (use ^& on Windows).
@@ -461,7 +456,7 @@ This miner does not use HTTP protocol, it uses Stratum directly. So you should c
   It's a problem of RDC, use TeamViewer or some other remote access software.
 
 - I see only one card instead of two in temperature management info.
-  Disable CrossFire.
+  Disable CrossFire, don't use Remote Desktop Connection.
 
 - Miner works in ETH-only mode but crashes in dual mode.
   Dual mode requires more power, so make sure PSU power is enough and check GPU clocks if you OC'ed them.
@@ -470,10 +465,13 @@ This miner does not use HTTP protocol, it uses Stratum directly. So you should c
   Specify "-mport 0" option.
 
 - How can I get stats from miner as EthMan does?
-  Start EthMan and catch its tcp/ip data with WireShark, you will see json protocol details.
+  Check API.txt file for json protocol details.
 
 - I cannot mine Ethereum with 2GB card.
-  Yes, you cannot mine Ethereum or Ethereum Classic with 2GB cards anymore.
+  Yes, you cannot mine Ethereum or Ethereum Classic with 2GB cards anymore. But you can mine other Ethereum forks.
+
+- I mine ETH fork on my 2GB cards. For devfee miner tries to mine ETH and it fails because ETH cannot be mined on 2GB cards.
+- Use "-allcoins exp -allpools 1" options.
 
 - On dual mining, if one of my miners has 6 cards, with 2 dual mining and 4 single mining, is devfee 1% or 2%? 
   As soon as you enable dual mining, devfee is 2% for all cards. But you can start two miner instances and split cards between them to get 1% on first instance and 2% on second.
@@ -493,3 +491,19 @@ This miner does not use HTTP protocol, it uses Stratum directly. So you should c
 - How many cards are supported?
   Miner supports up to 32 GPUs, though some options like "-di" will not work properly for some cards since they accept 0..9 indexes only.
 
+- Miner crashed and I cannot restart it until reboot.
+  Often when OpenCL fails, you have to reboot the system, not just restart miner. Sometimes even soft reboot won't work and you have to press Reset button. It is because the fail is at drivers level, Windows does not like such things and drivers too.
+
+
+FAQ #2:
+
+1. If you think that the miner will mine even if you turn off the router, wait a couple of minutes more, it will stop.
+2. Place all command line arguments in .BAT file in a single line. Arguments from the second line will be ignored.
+3. Use latest version if you have problems with DCR or SIA.
+4. I don't have any private versions with +50% speed.
+5. I'm a software developer, so I think I cannot help you to build your mining rig properly or provide you with the list of necessary parts, please ask this question here on forum or search here, there are many threads related to hardware.
+6. Please read Readme.txt or original post of this thread for command line samples, options description and FAQ.
+7. I don't have miners for Tesla, IBM CPUs, Phi or for very old GPUs.
+8. Mining on laptops is a bad idea.
+9. You will not see full hashrate on pool immediately, you have to wait for 24 hours at least.
+10. If miner cannot generate DAG file, check environment variables (see Readme), check if your GPU has 3GB memory at least, and check if you have enough virtual memory (pagefile). If all this does not help, try to install more physical RAM.
